@@ -1,21 +1,24 @@
 import { PATH_DB } from '../constants/contacts.js';
+import { createFakeContact } from '../utils/createFakeContact.js';
+import fs from 'fs/promises';
 
-export const addOneContact = async () => {};
+export const addOneContact = async () => {
+    try {
+        const data = await fs.readFile(PATH_DB, 'utf-8');
+        const dbData = JSON.parse(data);
 
-await addOneContact();
+        const newContact = createFakeContact();
+        dbData.push(newContact);
+        await fs.writeFile(PATH_DB, JSON.stringify(dbData, null, 2), 'utf-8');
 
+        console.log('Contact was added successfully');
+    } catch(error) {
+        if (error.code === 'ENOENT') {
+            console.error(`File via ${PATH_DB} doesn't exist.`);
+        } else {
+            console.error('Error generating contacts:', error);
+        }
+    }
+};
 
-// [fs.appendFile(path, data [, options])](<https://nodejs.org/api/fs.html#fspromisesappendfilepath-data-options>)додавання у файл
-
-// import fs from 'fs/promises';
-
-// // Додаємо дані до файлу 'output.txt'
-// (async () => {
-//   const data = 'Це дані, які ми додаємо до файлу.';
-//   try {
-//     await fs.appendFile('output.txt', data, 'utf8');
-//     console.log('Дані успішно додані до файлу.');
-//   } catch (err) {
-//     console.error('Помилка додавання даних до файлу:', err);
-//   }
-// })();
+addOneContact();
